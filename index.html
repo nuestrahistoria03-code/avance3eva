@@ -1,0 +1,1244 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Misterio en el Cuerpo Humano · Agencia de Detectives Inmunes</title>
+<style>
+  :root{
+    --bg:#0b1020; --panel:#141a33; --panel2:#1b2347;
+    --accent:#ffd166; --accent2:#06d6a0; --danger:#ef476f;
+    --text:#e9ecf5; --muted:#9aa3c7; --line:#2a335e;
+    --cat-barreras:#4cc9f0; --cat-innata:#f8961e;
+    --cat-adaptativa:#b388ff; --cat-memoria:#06d6a0; --cat-trastornos:#ef476f;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+    background:radial-gradient(1200px 600px at 10% -10%,#1a2250 0%,transparent 60%),
+               radial-gradient(900px 500px at 110% 10%,#2a1a50 0%,transparent 60%),
+               var(--bg);
+    color:var(--text); min-height:100vh;
+  }
+  header{
+    padding:20px; text-align:center; border-bottom:2px solid var(--accent);
+    background:linear-gradient(180deg,rgba(20,26,51,.95),rgba(11,16,32,.95));
+    position:sticky; top:0; z-index:10; backdrop-filter:blur(10px);
+  }
+  header h1{margin:0; font-size:1.5rem; color:var(--accent); letter-spacing:1px}
+  header p{margin:5px 0 0; color:var(--muted); font-size:.9rem}
+  .progress-bar{height:6px; background:var(--panel2); margin-top:15px; border-radius:999px; overflow:hidden}
+  .progress-fill{height:100%; width:0%; background:linear-gradient(90deg,var(--accent2),var(--accent)); transition:width .5s ease}
+  nav{
+    display:flex; flex-wrap:wrap; gap:8px; justify-content:center;
+    padding:15px; background:var(--panel); border-bottom:1px solid var(--line);
+    position:sticky; top:70px; z-index:9;
+  }
+  nav button{
+    background:var(--panel2); color:var(--muted); border:1px solid var(--line);
+    padding:8px 14px; border-radius:8px; cursor:not-allowed; font-size:.85rem;
+    transition:all .2s; opacity:.5;
+  }
+  nav button.unlocked{color:var(--text); cursor:pointer; opacity:1}
+  nav button.unlocked:hover{border-color:var(--accent); background:#1f2850}
+  nav button.active{background:var(--accent); color:#1a1a1a; font-weight:700; opacity:1}
+  nav button.completed{background:#0f2a22; border-color:var(--accent2); color:var(--accent2); opacity:1}
+  nav button.completed::after{content:" ✓"; font-weight:bold}
+  main{max-width:1100px; margin:0 auto; padding:20px}
+  .section{display:none; animation:fadeIn .3s}
+  .section.active{display:block}
+  @keyframes fadeIn{from{opacity:0; transform:translateY(10px)} to{opacity:1; transform:none}}
+  .card{
+    background:linear-gradient(180deg,var(--panel),var(--panel2));
+    border:1px solid var(--line); border-radius:14px; padding:24px; margin-bottom:20px;
+    box-shadow:0 8px 24px rgba(0,0,0,.3);
+  }
+  .card h2{margin:0 0 15px; color:var(--accent); font-size:1.3rem}
+  .card h3{margin:18px 0 10px; color:var(--accent2); font-size:1.1rem}
+  .card p, .card li{line-height:1.7; color:#dfe3f5; margin:8px 0}
+  .tag{display:inline-block; background:#2a335e; color:#fff; padding:3px 10px; border-radius:999px; font-size:.8rem; margin-right:6px}
+  button, .btn{
+    background:var(--accent); color:#1a1a1a; border:0; padding:12px 20px;
+    border-radius:10px; font-weight:700; cursor:pointer; font-size:1rem; transition:all .2s;
+  }
+  button:hover{filter:brightness(1.1); transform:translateY(-2px)}
+  button:active{transform:translateY(0)}
+  button.secondary{background:var(--panel2); color:var(--text); border:1px solid var(--line)}
+  button:disabled{opacity:.5; cursor:not-allowed; transform:none}
+  input[type=text]{
+    background:#0f1530; color:var(--text); border:1px solid var(--line);
+    padding:10px 14px; border-radius:8px; font-size:1rem; width:100%; max-width:300px;
+  }
+  input:focus{outline:2px solid var(--accent)}
+  .case{
+    background:#0f1530; border:2px solid var(--line); border-radius:12px;
+    padding:18px; margin:15px 0; cursor:pointer; transition:all .2s;
+  }
+  .case:hover{border-color:var(--accent); transform:translateX(5px)}
+  .case.selected{border-color:var(--accent2); background:#0f2a22}
+  .case h4{margin:0 0 8px; color:var(--accent)}
+  .case p{margin:5px 0; font-size:.95rem}
+  .opts{display:flex; flex-direction:column; gap:8px; margin:12px 0}
+  .opts label{
+    display:flex; align-items:center; gap:10px; padding:10px 14px;
+    background:#0f1530; border:1px solid var(--line); border-radius:8px; cursor:pointer; transition:all .2s;
+  }
+  .opts label:hover{border-color:var(--accent); background:#1a2250}
+  .opts input{accent-color:var(--accent); width:18px; height:18px}
+  .feedback{margin-top:12px; padding:12px 16px; border-radius:10px; font-size:.95rem; display:none}
+  .feedback.ok{background:#0f2a22; border:1px solid var(--accent2); color:#c7f5e0; display:block}
+  .feedback.err{background:#2a0f1a; border:1px solid var(--danger); color:#ffd0dc; display:block}
+  .hint{background:#1a2250; border-left:4px solid var(--accent); padding:10px 14px; margin:8px 0; border-radius:6px; font-size:.9rem}
+  .memory{display:grid; grid-template-columns:repeat(4,1fr); gap:10px; max-width:600px; margin:15px auto}
+  .memory .tile{
+    aspect-ratio:1; background:var(--panel2); border:2px solid var(--line);
+    border-radius:12px; display:flex; align-items:center; justify-content:center;
+    font-size:.85rem; cursor:pointer; text-align:center; padding:8px;
+    transition:all .2s; user-select:none; font-weight:600;
+  }
+  .memory .tile:hover{border-color:var(--accent)}
+  .memory .tile.flip{background:var(--accent); color:#1a1a1a; border-color:var(--accent)}
+  .memory .tile.matched{background:var(--accent2); color:#0b1020; cursor:default; border-color:var(--accent2)}
+  .question{margin:18px 0; padding:16px; background:#0f1530; border-radius:12px; border:1px solid var(--line)}
+  .question.correct{border-color:var(--accent2); background:#0f2a22}
+  .question.wrong{border-color:var(--danger); background:#2a0f1a}
+  .question .expl{margin-top:10px; font-size:.9rem; color:var(--muted); font-style:italic}
+  .score-big{font-size:2.5rem; color:var(--accent); font-weight:800; text-align:center; margin:15px 0}
+  .badge{display:inline-block; background:var(--panel2); border:2px solid var(--accent); color:var(--accent); padding:6px 14px; border-radius:999px; font-size:.9rem; margin:5px; font-weight:600}
+  
+  /* ===== CANDY CRUSH ===== */
+  .candy-wrap{display:grid; grid-template-columns:1fr 320px; gap:20px}
+  @media (max-width:900px){.candy-wrap{grid-template-columns:1fr}}
+  .candy-board{
+    background:#0f1530; border:2px solid var(--accent); border-radius:16px;
+    padding:18px;
+  }
+  .candy-stats{
+    display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:15px;
+  }
+  .candy-stat{
+    background:var(--panel2); padding:10px; border-radius:10px; text-align:center;
+    border:1px solid var(--line);
+  }
+  .candy-stat strong{display:block; font-size:1.4rem; color:var(--accent)}
+  .candy-stat span{font-size:.75rem; color:var(--muted); text-transform:uppercase}
+  .candy-grid{
+    display:grid; grid-template-columns:repeat(8,1fr); gap:4px;
+    max-width:480px; margin:0 auto; aspect-ratio:1;
+  }
+  .candy-cell{
+    aspect-ratio:1; border-radius:10px; display:flex; align-items:center; justify-content:center;
+    font-size:1.6rem; cursor:pointer; transition:transform .15s, opacity .3s;
+    border:2px solid transparent; user-select:none; position:relative;
+  }
+  .candy-cell:hover{transform:scale(1.08)}
+  .candy-cell.selected{
+    border-color:#fff; box-shadow:0 0 20px rgba(255,255,255,.6);
+    transform:scale(1.1); z-index:2;
+  }
+  .candy-cell.matching{animation:pop .4s ease}
+  .candy-cell.falling{animation:fall .3s ease}
+  @keyframes pop{
+    0%{transform:scale(1); opacity:1}
+    50%{transform:scale(1.4); opacity:.6}
+    100%{transform:scale(0); opacity:0}
+  }
+  @keyframes fall{
+    from{transform:translateY(-60px); opacity:0}
+    to{transform:translateY(0); opacity:1}
+  }
+  .candy-cell.barreras{background:var(--cat-barreras)}
+  .candy-cell.innata{background:var(--cat-innata)}
+  .candy-cell.adaptativa{background:var(--cat-adaptativa)}
+  .candy-cell.memoria{background:var(--cat-memoria)}
+  .candy-cell.trastornos{background:var(--cat-trastornos)}
+  
+  .candy-sidebar{
+    background:var(--panel2); border-radius:12px; padding:15px;
+    max-height:700px; overflow-y:auto; border:1px solid var(--line);
+  }
+  .candy-sidebar h3{margin:0 0 10px; color:var(--accent); font-size:1rem; position:sticky; top:0; background:var(--panel2); padding-bottom:8px}
+  .data-list{display:flex; flex-direction:column; gap:8px}
+  .data-item{
+    background:#0f1530; border:1px solid var(--line); border-radius:8px;
+    padding:10px; font-size:.85rem; transition:all .3s;
+  }
+  .data-item.locked{opacity:.3; filter:blur(2px)}
+  .data-item.unlocked{border-left:4px solid var(--accent2)}
+  .data-item.barreras.unlocked{border-left-color:var(--cat-barreras)}
+  .data-item.innata.unlocked{border-left-color:var(--cat-innata)}
+  .data-item.adaptativa.unlocked{border-left-color:var(--cat-adaptativa)}
+  .data-item.memoria.unlocked{border-left-color:var(--cat-memoria)}
+  .data-item.trastornos.unlocked{border-left-color:var(--cat-trastornos)}
+  .data-item .concept{font-weight:700; color:var(--accent); margin-bottom:4px; font-size:.9rem}
+  .data-item .expl{color:var(--muted); font-size:.78rem; line-height:1.4}
+  .data-item.new{animation:newData .6s ease}
+  @keyframes newData{
+    0%{transform:scale(.8); background:var(--accent)}
+    100%{transform:scale(1); background:#0f1530}
+  }
+  
+  .candy-controls{display:flex; gap:10px; margin-top:15px; justify-content:center; flex-wrap:wrap}
+  .candy-msg{
+    text-align:center; padding:12px; margin:12px 0; border-radius:10px;
+    background:linear-gradient(135deg,#0f2a22,#1a2250); border:2px solid var(--accent2);
+    animation:fadeIn .3s; font-weight:600;
+  }
+  .candy-legend{
+    display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin:10px 0;
+  }
+  .legend-item{
+    display:flex; align-items:center; gap:5px; font-size:.8rem;
+    background:var(--panel2); padding:4px 10px; border-radius:999px;
+  }
+  .legend-dot{width:14px; height:14px; border-radius:4px}
+  
+  @media (max-width:700px){
+    header h1{font-size:1.2rem}
+    nav{top:60px}
+    nav button{padding:6px 10px; font-size:.8rem}
+    .memory{grid-template-columns:repeat(3,1fr)}
+    .candy-cell{font-size:1.2rem}
+    .candy-stats{grid-template-columns:repeat(2,1fr)}
+  }
+  @media (prefers-reduced-motion: reduce){
+    *{animation:none !important; transition:none !important}
+  }
+  :focus-visible{outline:3px solid var(--accent); outline-offset:2px}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🕵️ Agencia de Detectives Inmunes</h1>
+  <p>Tu Misión: Resolver el Misterio del Cuerpo Humano</p>
+  <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+</header>
+
+<nav id="mainNav">
+  <button data-target="sec-caso" class="active unlocked">📁 El Caso</button>
+  <button data-target="sec-inteligencia">🏛️ Inteligencia</button>
+  <button data-target="sec-verificar">🕵️ Verificar Reporte</button>
+  <button data-target="sec-pistas">🔎 Pistas</button>
+  <button data-target="sec-expediente">🤫 Expediente Secreto</button>
+  <button data-target="sec-memory">🎮 Entrena tu Atención</button>
+  <button data-target="sec-interrogatorio">❓ Interrogatorio</button>
+  <button data-target="sec-informe">📝 Informe Final</button>
+  <button data-target="sec-candy" class="unlocked">🍬 Laboratorio de Datos</button>
+</nav>
+
+<main>
+
+  <section id="sec-caso" class="section active">
+    <div class="card">
+      <h2>📁 INFORME CLASIFICADO</h2>
+      <p><span class="tag">Caso 001</span> <strong>El Invasor Silencioso</strong></p>
+      <h3>Descripción</h3>
+      <p>Un "invasor" 🦠 ha traspasado la piel a través de una herida. El cuerpo, "Ciudad Corpus", está en alerta.</p>
+      <h3>Síntomas Reportados</h3>
+      <ul>
+        <li>🌡️ <strong>Inflamación Local:</strong> La zona está enrojecida y caliente.</li>
+        <li>🌡️ <strong>Fiebre Leve:</strong> La temperatura general está subiendo.</li>
+        <li>😴 <strong>Fatiga:</strong> El ciudadano se siente cansado.</li>
+      </ul>
+      <h3>Selecciona el tipo de caso</h3>
+      <div class="case" data-case="bacteria">
+        <h4>🦠 Caso A: Infección Bacteriana</h4>
+        <p><strong>Síntomas:</strong> Pus visible, inflamación localizada, enrojecimiento intenso</p>
+        <p><strong>Respuesta típica:</strong> Fuerte reacción de fagocitos</p>
+      </div>
+      <div class="case" data-case="virus">
+        <h4>🧬 Caso B: Infección Viral</h4>
+        <p><strong>Síntomas:</strong> Fiebre alta, fatiga generalizada</p>
+        <p><strong>Respuesta típica:</strong> Linfocitos T destruyen células infectadas</p>
+      </div>
+      <div class="case" data-case="alergia">
+        <h4>⚠️ Caso C: Reacción Alérgica</h4>
+        <p><strong>Síntomas:</strong> Inflamación excesiva, picazón, estornudos</p>
+        <p><strong>Respuesta típica:</strong> Producción masiva de IgE</p>
+      </div>
+      <div class="feedback" id="caseFeedback"></div>
+      <div style="margin-top:20px">
+        <button id="confirmCase" disabled>Confirmar caso y continuar →</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="sec-inteligencia" class="section">
+    <div class="card">
+      <h2>🏛️ Central de Inteligencia</h2>
+      <h3>Directiva #1: El Relato del Agente Leuko</h3>
+      <p><em>"Mi nombre es Leuko, y soy un neutrófilo... Soy la primera línea de defensa... llegó la alarma. ¡Una brecha! Un objeto afilado había roto la muralla de la piel... nos lanzamos a engullirlos... Varios de mis hermanos cayeron, formando el 'pus'... Llegaron los macrófagos... y los linfocitos, quienes 'fotografiaron' al enemigo para crear anticuerpos y para no olvidarlo jamás... Mi vida es corta, pero tiene un propósito: proteger a Ciudad Corpus."</em></p>
+      <h3>Directiva #2: Fichas de Agentes</h3>
+      <ul>
+        <li><strong>Barreras Primarias:</strong> La piel y mucosas son los muros.</li>
+        <li><strong>Fagocitos:</strong> Agentes que "comen" invasores (Macrófagos, Neutrófilos).</li>
+        <li><strong>Linfocitos B:</strong> Crean "armas" llamadas anticuerpos.</li>
+        <li><strong>Linfocitos T:</strong> Destruyen células "secuestradas" por virus.</li>
+        <li><strong>Memoria:</strong> El sistema recuerda enemigos. Base de las vacunas.</li>
+      </ul>
+      <div style="margin-top:20px">
+        <button id="toIntelligence2">He leído la inteligencia → Continuar</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="sec-verificar" class="section">
+    <div class="card">
+      <h2>🕵️ Verificar Reporte de Inteligencia</h2>
+      <p>Completa los espacios en blanco.</p>
+      <div class="cloze-item">
+        <p>1. La primera barrera de defensa es la <input type="text" data-answer="piel" data-alt="mucosa,mucosas" placeholder="...">.</p>
+        <div class="feedback"></div>
+      </div>
+      <div class="cloze-item">
+        <p>2. Los agentes que "comen" invasores se llaman <input type="text" data-answer="fagocitos" placeholder="...">.</p>
+        <div class="feedback"></div>
+      </div>
+      <div class="cloze-item">
+        <p>3. Las "armas" específicas son los <input type="text" data-answer="anticuerpos" placeholder="...">, creados por los Linfocitos B.</p>
+        <div class="feedback"></div>
+      </div>
+      <div class="cloze-item">
+        <p>4. La habilidad de recordar se llama <input type="text" data-answer="memoria" placeholder="..."> inmunológica.</p>
+        <div class="feedback"></div>
+      </div>
+      <div style="margin-top:20px">
+        <button id="checkCloze">Verificar respuestas</button>
+        <button id="toVerificar2" disabled style="margin-left:10px">Continuar →</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="sec-pistas" class="section">
+    <div class="card">
+      <h2>🔎 Tablón de Pistas</h2>
+      <div class="hint">PISTA #1: El invasor entró por una brecha en la primera barrera: la piel.</div>
+      <div class="hint">PISTA #2: Los agentes "devoradores" (fagocitos) son la primera respuesta.</div>
+      <div class="hint">PISTA #3: Las armas específicas (anticuerpos) son creadas por los Linfocitos B.</div>
+      <div class="hint">PISTA #4: El sistema creará una "memoria" para recordar al invasor.</div>
+      <div style="margin-top:20px">
+        <button id="toPistas2">Continuar al Expediente Secreto →</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="sec-expediente" class="section">
+    <div class="card">
+      <h2>🤫 Expediente Secreto: X-001</h2>
+      <h3>Autofagia</h3>
+      <p>Tus células tienen un sistema de reciclaje interno. La autofagia "se come" partes dañadas. Si un patógeno entra, puede atraparlo antes de que se multiplique.</p>
+      <h3>Mimetismo molecular</h3>
+      <p>Algunos invasores se disfrazan para parecerse a nuestras células. Esto confunde al sistema inmunitario y puede provocar enfermedades autoinmunes.</p>
+      <h3>Células de memoria</h3>
+      <p>Son "soldados veteranos" que recuerdan al enemigo. Este es el principio de las vacunas.</p>
+      <div style="margin-top:20px">
+        <button id="toExpediente2">Continuar al Entrenamiento →</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="sec-memory" class="section">
+    <div class="card">
+      <h2>🎮 Centro de Entrenamiento: Empareja</h2>
+      <p>Empareja cada agente con su función.</p>
+      <div class="memory" id="memoryGrid"></div>
+      <div style="margin-top:15px; text-align:center">
+        <span>Parejas: <strong id="memPairs">0</strong> / 4</span>
+        <button class="secondary" id="resetMem" style="margin-left:10px">↺ Reiniciar</button>
+      </div>
+      <div style="margin-top:20px; text-align:center">
+        <button id="toMemory2" disabled>Continuar al Interrogatorio →</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="sec-interrogatorio" class="section">
+    <div class="card">
+      <h2>❓ Sala de Interrogatorio</h2>
+      <p>Responde las preguntas. Si fallas, recibirás pistas progresivas.</p>
+      <div class="question" data-q="1">
+        <p><strong>P1.</strong> Han pasado 4 horas desde la herida y hay pus. ¿Qué ocurrió?</p>
+        <div class="opts">
+          <label><input type="radio" name="q1" value="a"> Los linfocitos B fabricaron anticuerpos</label>
+          <label><input type="radio" name="q1" value="b"> Neutrófilos fagocitaron bacterias y murieron</label>
+          <label><input type="radio" name="q1" value="c"> El cuerpo ya tiene inmunidad de por vida</label>
+        </div>
+        <div class="hint" style="display:none"></div>
+        <div class="feedback"></div>
+      </div>
+      <div class="question" data-q="2">
+        <p><strong>P2.</strong> "La fiebre significa que el tratamiento falló". ¿Verdadero o falso?</p>
+        <div class="opts">
+          <label><input type="radio" name="q2" value="v"> Verdadero</label>
+          <label><input type="radio" name="q2" value="f"> Falso</label>
+        </div>
+        <div class="hint" style="display:none"></div>
+        <div class="feedback"></div>
+      </div>
+      <div class="question" data-q="3">
+        <p><strong>P3.</strong> ¿Qué tipo de respuesta inmune actúa primero?</p>
+        <div class="opts">
+          <label><input type="radio" name="q3" value="a"> Innata (barreras, fagocitos)</label>
+          <label><input type="radio" name="q3" value="b"> Adaptativa (linfocitos B y T)</label>
+          <label><input type="radio" name="q3" value="c"> Ambas al mismo tiempo</label>
+        </div>
+        <div class="hint" style="display:none"></div>
+        <div class="feedback"></div>
+      </div>
+      <div style="margin-top:20px">
+        <button id="checkInterrog">Verificar interrogatorio</button>
+        <button id="toInterrog2" disabled style="margin-left:10px">Continuar al Informe Final →</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="sec-informe" class="section">
+    <div class="card">
+      <h2>📝 Informe Final del Caso 001</h2>
+      <p>Selecciona la opción correcta en cada apartado.</p>
+      <div class="question" data-final="1">
+        <p><strong>1. Identificación del Invasor:</strong> el invasor fue clasificado como una…</p>
+        <div class="opts">
+          <label><input type="radio" name="f1" value="bacteria"> bacteria</label>
+          <label><input type="radio" name="f1" value="virus"> virus</label>
+        </div>
+        <div class="feedback"></div>
+      </div>
+      <div class="question" data-final="2">
+        <p><strong>2. Punto de Infiltración:</strong> la brecha ocurrió a través de la…</p>
+        <div class="opts">
+          <label><input type="radio" name="f2" value="piel"> piel</label>
+          <label><input type="radio" name="f2" value="fiebre"> fiebre</label>
+          <label><input type="radio" name="f2" value="mucosa"> mucosa</label>
+        </div>
+        <div class="feedback"></div>
+      </div>
+      <div class="question" data-final="3">
+        <p><strong>3. Primera Respuesta:</strong> las primeras unidades en llegar fueron los…</p>
+        <div class="opts">
+          <label><input type="radio" name="f3" value="linfocitosT"> linfocitos T</label>
+          <label><input type="radio" name="f3" value="fagocitos"> fagocitos</label>
+          <label><input type="radio" name="f3" value="anticuerpos"> anticuerpos</label>
+        </div>
+        <div class="feedback"></div>
+      </div>
+      <div class="question" data-final="4">
+        <p><strong>4. Producción de Armamento:</strong> los… fabrican anticuerpos.</p>
+        <div class="opts">
+          <label><input type="radio" name="f4" value="linfocitosB"> linfocitos B</label>
+          <label><input type="radio" name="f4" value="neutrofilos"> neutrófilos</label>
+          <label><input type="radio" name="f4" value="macrofagos"> macrófagos</label>
+        </div>
+        <div class="feedback"></div>
+      </div>
+      <div class="question" data-final="5">
+        <p><strong>5. Residuos de Batalla:</strong> el sacrificio de Leuko crea el…</p>
+        <div class="opts">
+          <label><input type="radio" name="f5" value="pus"> pus</label>
+          <label><input type="radio" name="f5" value="sangre"> sangre</label>
+          <label><input type="radio" name="f5" value="plasma"> plasma</label>
+        </div>
+        <div class="feedback"></div>
+      </div>
+      <div class="question" data-final="6">
+        <p><strong>6. Estrategia a Largo Plazo:</strong> el sistema creará una…</p>
+        <div class="opts">
+          <label><input type="radio" name="f6" value="memoria"> memoria inmunológica</label>
+          <label><input type="radio" name="f6" value="alergia"> alergia</label>
+          <label><input type="radio" name="f6" value="autofagia"> autofagia</label>
+        </div>
+        <div class="feedback"></div>
+      </div>
+      <div class="question" data-final="7">
+        <p><strong>7. Vacunas:</strong> se basan en crear un ejército de…</p>
+        <div class="opts">
+          <label><input type="radio" name="f7" value="memoria"> células de memoria</label>
+          <label><input type="radio" name="f7" value="rojas"> células rojas</label>
+          <label><input type="radio" name="f7" value="patogenos"> patógenos</label>
+        </div>
+        <div class="feedback"></div>
+      </div>
+      <div style="margin-top:20px">
+        <button id="submitReport">Verificar y Archivar Informe</button>
+      </div>
+    </div>
+    <div class="card" id="reportResult" style="display:none">
+      <h2>🏆 Resultado de la Investigación</h2>
+      <div class="score-big" id="finalScore">0 / 7</div>
+      <p id="finalMsg" style="text-align:center; font-size:1.1rem"></p>
+      <div id="badges" style="text-align:center; margin:20px 0"></div>
+      <div style="text-align:center; margin-top:20px">
+        <button id="downloadReport">📄 Descargar Informe</button>
+        <button class="secondary" id="reinvestigar" style="margin-left:10px">🔁 Reinvestigar Errores</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="sec-candy" class="section">
+    <div class="card">
+      <h2>🍬 Laboratorio de Datos: Candy Crush Inmune</h2>
+      <p>¡Disponible en cualquier momento! Intercambia fichas adyacentes para hacer <strong>combinaciones de 3 o más</strong> del mismo color. Cada combinación desbloquea un dato importante del sistema inmune.</p>
+      
+      <div class="candy-legend">
+        <div class="legend-item"><div class="legend-dot" style="background:var(--cat-barreras)"></div>🛡️ Barreras</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--cat-innata)"></div>⚡ Innata</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--cat-adaptativa)"></div>🎯 Adaptativa</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--cat-memoria)"></div>🧠 Memoria</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--cat-trastornos)"></div>⚠️ Trastornos</div>
+      </div>
+      
+      <div class="candy-wrap">
+        <div class="candy-board">
+          <div class="candy-stats">
+            <div class="candy-stat"><strong id="candyScore">0</strong><span>Puntos</span></div>
+            <div class="candy-stat"><strong id="candyMoves">0</strong><span>Movimientos</span></div>
+            <div class="candy-stat"><strong id="candyData">0/105</strong><span>Datos</span></div>
+            <div class="candy-stat"><strong id="candyCombo">0</strong><span>Mejor combo</span></div>
+          </div>
+          <div class="candy-grid" id="candyGrid"></div>
+          <div id="candyMsg"></div>
+          <div class="candy-controls">
+            <button id="candyReset">🔄 Reiniciar</button>
+            <button class="secondary" id="candyShuffle">🔀 Mezclar tablero</button>
+          </div>
+        </div>
+        <div class="candy-sidebar">
+          <h3>📚 Datos Desbloqueados</h3>
+          <div class="data-list" id="dataList"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<script>
+// ===== NAVEGACIÓN =====
+const PROGRESS = {completed: new Set(), totalSections: 9};
+
+function showSection(sectionId) {
+  const navBtn = document.querySelector(`nav button[data-target="${sectionId}"]`);
+  if (!navBtn || (!navBtn.classList.contains('unlocked') && !navBtn.classList.contains('completed'))) return;
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.getElementById(sectionId).classList.add('active');
+  document.querySelectorAll('nav button').forEach(btn => btn.classList.remove('active'));
+  navBtn.classList.add('active');
+  window.scrollTo({top: 0, behavior: 'smooth'});
+}
+
+function unlockNext(currentSection) {
+  PROGRESS.completed.add(currentSection);
+  const navBtns = document.querySelectorAll('nav button');
+  const currentIdx = Array.from(navBtns).findIndex(btn => btn.dataset.target === currentSection);
+  if (currentIdx < navBtns.length - 1) navBtns[currentIdx + 1].classList.add('unlocked');
+  const currentBtn = document.querySelector(`nav button[data-target="${currentSection}"]`);
+  currentBtn.classList.remove('active');
+  currentBtn.classList.add('completed');
+  updateProgress();
+}
+
+function updateProgress() {
+  const percent = (PROGRESS.completed.size / PROGRESS.totalSections) * 100;
+  document.getElementById('progressFill').style.width = percent + '%';
+}
+
+document.querySelectorAll('nav button').forEach(btn => {
+  btn.addEventListener('click', () => showSection(btn.dataset.target));
+});
+
+const STATE = {selectedCase: null, clozeScore: 0, interrogScore: 0, finalScore: 0, memDone: false};
+
+// ===== FASE 1: CASO =====
+document.querySelectorAll('.case').forEach(c => {
+  c.addEventListener('click', () => {
+    document.querySelectorAll('.case').forEach(x => x.classList.remove('selected'));
+    c.classList.add('selected');
+    STATE.selectedCase = c.dataset.case;
+    document.getElementById('confirmCase').disabled = false;
+    const fb = document.getElementById('caseFeedback');
+    fb.className = 'feedback ok';
+    const caseName = c.dataset.case === 'bacteria' ? 'A' : c.dataset.case === 'virus' ? 'B' : 'C';
+    fb.textContent = `✅ Has seleccionado el Caso ${caseName}.`;
+  });
+});
+document.getElementById('confirmCase').addEventListener('click', () => {
+  unlockNext('sec-caso');
+  showSection('sec-inteligencia');
+});
+
+// ===== FASE 2 =====
+document.getElementById('toIntelligence2').addEventListener('click', () => {
+  unlockNext('sec-inteligencia');
+  showSection('sec-verificar');
+});
+
+// ===== FASE 3 =====
+document.getElementById('checkCloze').addEventListener('click', () => {
+  let correct = 0;
+  document.querySelectorAll('.cloze-item').forEach(item => {
+    const input = item.querySelector('input');
+    const fb = item.querySelector('.feedback');
+    const ans = input.dataset.answer;
+    const alt = (input.dataset.alt || '').split(',');
+    const val = input.value.trim().toLowerCase();
+    if (val === ans || alt.includes(val)) {
+      fb.className = 'feedback ok';
+      fb.textContent = '✅ Correcto.';
+      input.style.borderColor = 'var(--accent2)';
+      correct++;
+    } else {
+      fb.className = 'feedback err';
+      fb.innerHTML = `❌ Pista: empieza por "<strong>${ans[0]}</strong>" y tiene ${ans.length} letras.`;
+      input.style.borderColor = 'var(--danger)';
+    }
+  });
+  STATE.clozeScore = correct;
+  if (correct === 4) document.getElementById('toVerificar2').disabled = false;
+});
+document.getElementById('toVerificar2').addEventListener('click', () => {
+  unlockNext('sec-verificar');
+  showSection('sec-pistas');
+});
+
+// ===== FASE 4 =====
+document.getElementById('toPistas2').addEventListener('click', () => {
+  unlockNext('sec-pistas');
+  showSection('sec-expediente');
+});
+
+// ===== FASE 5 =====
+document.getElementById('toExpediente2').addEventListener('click', () => {
+  unlockNext('sec-expediente');
+  showSection('sec-memory');
+});
+
+// ===== FASE 6: MEMORY =====
+const memPairs = [
+  {a: 'Neutrófilo', b: 'Fagocitosis'},
+  {a: 'Linfocito B', b: 'Anticuerpos'},
+  {a: 'Linfocito T', b: 'Células infectadas'},
+  {a: 'Macrófago', b: 'Presenta antígeno'}
+];
+let memFlipped = [], memMatched = 0;
+
+function buildMemory() {
+  const grid = document.getElementById('memoryGrid');
+  grid.innerHTML = '';
+  const cards = [];
+  memPairs.forEach((p, i) => {
+    cards.push({id: i, text: p.a, pair: i});
+    cards.push({id: i, text: p.b, pair: i});
+  });
+  for (let i = cards.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [cards[i], cards[j]] = [cards[j], cards[i]];
+  }
+  cards.forEach(c => {
+    const t = document.createElement('div');
+    t.className = 'tile';
+    t.textContent = '?';
+    t.dataset.pair = c.pair;
+    t.dataset.text = c.text;
+    t.tabIndex = 0;
+    t.addEventListener('click', () => flipTile(t));
+    t.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') flipTile(t);
+    });
+    grid.appendChild(t);
+  });
+}
+
+function flipTile(t) {
+  if (t.classList.contains('flip') || t.classList.contains('matched')) return;
+  t.classList.add('flip');
+  t.textContent = t.dataset.text;
+  memFlipped.push(t);
+  if (memFlipped.length === 2) {
+    const [a, b] = memFlipped;
+    if (a.dataset.pair === b.dataset.pair && a.dataset.text !== b.dataset.text) {
+      setTimeout(() => {
+        a.classList.add('matched');
+        b.classList.add('matched');
+        memFlipped = [];
+        memMatched++;
+        document.getElementById('memPairs').textContent = memMatched;
+        if (memMatched === memPairs.length) {
+          STATE.memDone = true;
+          document.getElementById('toMemory2').disabled = false;
+        }
+      }, 400);
+    } else {
+      setTimeout(() => {
+        a.classList.remove('flip');
+        a.textContent = '?';
+        b.classList.remove('flip');
+        b.textContent = '?';
+        memFlipped = [];
+      }, 900);
+    }
+  }
+}
+
+document.getElementById('resetMem').addEventListener('click', () => {
+  memFlipped = [];
+  memMatched = 0;
+  document.getElementById('memPairs').textContent = 0;
+  document.getElementById('toMemory2').disabled = true;
+  buildMemory();
+});
+buildMemory();
+document.getElementById('toMemory2').addEventListener('click', () => {
+  unlockNext('sec-memory');
+  showSection('sec-interrogatorio');
+});
+
+// ===== FASE 7: INTERROGATORIO =====
+const interrogData = {
+  1: {correct: 'b', hints: ['Piensa en quién llega primero.', 'Leuko cae formando algo visible.'], expl: 'El pus contiene neutrófilos muertos tras fagocitar bacterias.'},
+  2: {correct: 'f', hints: ['La fiebre no siempre es mala.', 'Es una respuesta deliberada.'], expl: 'La fiebre es parte de la respuesta innata: dificulta la reproducción de patógenos.'},
+  3: {correct: 'a', hints: ['Ocurre en minutos.', 'Incluye barreras y fagocitos.'], expl: 'La respuesta innata actúa primero. La adaptativa tarda días.'}
+};
+const interrogAttempts = {1: 0, 2: 0, 3: 0};
+
+document.getElementById('checkInterrog').addEventListener('click', () => {
+  let correct = 0;
+  [1, 2, 3].forEach(n => {
+    const q = document.querySelector(`.question[data-q="${n}"]`);
+    const sel = q.querySelector(`input[name="q${n}"]:checked`);
+    const fb = q.querySelector('.feedback');
+    const hint = q.querySelector('.hint');
+    if (!sel) {
+      fb.className = 'feedback err';
+      fb.textContent = 'Selecciona una opción.';
+      return;
+    }
+    interrogAttempts[n]++;
+    if (sel.value === interrogData[n].correct) {
+      fb.className = 'feedback ok';
+      fb.innerHTML = `✅ Correcto. ${interrogData[n].expl}`;
+      q.classList.add('correct');
+      correct++;
+    } else {
+      const hintIdx = Math.min(interrogAttempts[n] - 1, interrogData[n].hints.length - 1);
+      hint.style.display = 'block';
+      hint.textContent = '💡 Pista: ' + interrogData[n].hints[hintIdx];
+      fb.className = 'feedback err';
+      fb.textContent = '❌ No es correcto. Lee la pista y reintenta.';
+    }
+  });
+  STATE.interrogScore = correct;
+  if (correct === 3) document.getElementById('toInterrog2').disabled = false;
+});
+document.getElementById('toInterrog2').addEventListener('click', () => {
+  unlockNext('sec-interrogatorio');
+  showSection('sec-informe');
+});
+
+// ===== FASE 8: INFORME =====
+const finalData = {
+  1: {correct: 'bacteria', expl: 'Síntomas típicos de infección bacteriana.'},
+  2: {correct: 'piel', expl: 'La piel es la primera barrera física.'},
+  3: {correct: 'fagocitos', expl: 'Los fagocitos son la primera respuesta celular.'},
+  4: {correct: 'linfocitosB', expl: 'Los linfocitos B producen anticuerpos.'},
+  5: {correct: 'pus', expl: 'El pus es acumulación de neutrófilos muertos.'},
+  6: {correct: 'memoria', expl: 'La memoria permite respuestas más rápidas.'},
+  7: {correct: 'memoria', expl: 'Las vacunas generan células de memoria.'}
+};
+
+document.getElementById('submitReport').addEventListener('click', () => {
+  let score = 0;
+  [1, 2, 3, 4, 5, 6, 7].forEach(n => {
+    const q = document.querySelector(`.question[data-final="${n}"]`);
+    const sel = q.querySelector(`input[name="f${n}"]:checked`);
+    const fb = q.querySelector('.feedback');
+    if (!sel) {
+      fb.className = 'feedback err';
+      fb.textContent = 'Selecciona una opción.';
+      return;
+    }
+    if (sel.value === finalData[n].correct) {
+      fb.className = 'feedback ok';
+      fb.textContent = '✅ ' + finalData[n].expl;
+      q.classList.add('correct');
+      q.classList.remove('wrong');
+      score++;
+    } else {
+      fb.className = 'feedback err';
+      fb.textContent = '❌ ' + finalData[n].expl;
+      q.classList.add('wrong');
+      q.classList.remove('correct');
+    }
+  });
+  STATE.finalScore = score;
+  unlockNext('sec-informe');
+  showReport(score);
+});
+
+function showReport(score) {
+  const r = document.getElementById('reportResult');
+  r.style.display = 'block';
+  document.getElementById('finalScore').textContent = `${score} / 7`;
+  let msg = '';
+  if (score === 7) msg = '🏆 ¡Caso resuelto con excelencia!';
+  else if (score >= 5) msg = '👏 Buen trabajo. Revisa los puntos fallados.';
+  else if (score >= 3) msg = '📚 Caso parcialmente resuelto.';
+  else msg = '🔎 Necesitas repasar.';
+  document.getElementById('finalMsg').textContent = msg;
+  const badges = [];
+  if (score === 7) badges.push('🏅 Informe perfecto');
+  if (STATE.memDone) badges.push('🧠 Memoria de hierro');
+  if (STATE.clozeScore === 4) badges.push('📋 Reporte verificado');
+  if (STATE.interrogScore === 3) badges.push('🕵️ Interrogador experto');
+  document.getElementById('badges').innerHTML = badges.map(b => `<span class="badge">${b}</span>`).join('');
+  r.scrollIntoView({behavior: 'smooth'});
+}
+
+document.getElementById('downloadReport').addEventListener('click', () => {
+  const lines = [
+    `INFORME DEL CASO 001 · CIUDAD CORPUS`,
+    `Tipo de caso: ${STATE.selectedCase || 'No seleccionado'}`,
+    `Fecha: ${new Date().toLocaleString('es-ES')}`,
+    ``,
+    `Puntuación final: ${STATE.finalScore} / 7`,
+    `Verificación de reporte: ${STATE.clozeScore} / 4`,
+    `Interrogatorio: ${STATE.interrogScore} / 3`,
+    ``,
+    `CONCLUSIONES:`
+  ];
+  [1, 2, 3, 4, 5, 6, 7].forEach(n => {
+    const q = document.querySelector(`.question[data-final="${n}"]`);
+    const sel = q.querySelector(`input[name="f${n}"]:checked`);
+    const ok = sel && sel.value === finalData[n].correct;
+    lines.push(`${n}. ${ok ? '✓' : '✗'} ${finalData[n].expl}`);
+  });
+  const blob = new Blob([lines.join('\n')], {type: 'text/plain'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `informe_caso001.txt`;
+  a.click();
+  URL.revokeObjectURL(url);
+});
+
+document.getElementById('reinvestigar').addEventListener('click', () => {
+  if (STATE.clozeScore < 4) showSection('sec-verificar');
+  else if (STATE.interrogScore < 3) showSection('sec-interrogatorio');
+  else showSection('sec-inteligencia');
+});
+
+// ===== CANDY CRUSH =====
+const CANDY_DATA = [
+  // BARRERAS (20)
+  {c:'Piel', cat:'barreras', expl:'Barrera física principal. Sus células queratinizadas forman un muro impenetrable.'},
+  {c:'Mucosas', cat:'barreras', expl:'Recubren vías respiratoria, digestiva y urogenital. Atrapan patógenos con moco.'},
+  {c:'Lágrimas', cat:'barreras', expl:'Contienen lisozima, enzima que destruye paredes bacterianas.'},
+  {c:'Saliva', cat:'barreras', expl:'Contiene lisozima y lactoferrina. Lava la boca y neutraliza microbios.'},
+  {c:'Ácido gástrico', cat:'barreras', expl:'pH ~2 en el estómago. Destruye la mayoría de bacterias ingeridas.'},
+  {c:'Cerumen', cat:'barreras', expl:'Cera del oído. Ácida y pegajosa, atrapa polvo y microbios.'},
+  {c:'Flora intestinal', cat:'barreras', expl:'Bacterias buenas que compiten con patógenos por espacio y nutrientes.'},
+  {c:'pH vaginal', cat:'barreras', expl:'Lactobacilos producen ácido láctico. pH ~4 que impide infecciones.'},
+  {c:'Moco respiratorio', cat:'barreras', expl:'Atrapa patógenos inhalados. Los cilios lo barren hacia fuera.'},
+  {c:'Cilios', cat:'barreras', expl:'Pelillos microscópicos que barren el moco con patógenos hacia la faringe.'},
+  {c:'Sudor', cat:'barreras', expl:'Contiene sales, lisozima y dermcidina. Antibiótico natural de la piel.'},
+  {c:'Microbiota cutánea', cat:'barreras', expl:'Bacterias buenas de la piel que compiten con patógenos.'},
+  {c:'Bilis', cat:'barreras', expl:'Líquido digestivo que emulsiona grasas y tiene acción antimicrobiana.'},
+  {c:'Leche materna', cat:'barreras', expl:'Contiene IgA, lactoferrina y células inmunes. Primera inmunidad del bebé.'},
+  {c:'Placenta', cat:'barreras', expl:'Barrera física y selectiva entre madre y feto. Pasa anticuerpos IgG.'},
+  {c:'Córnea', cat:'barreras', expl:'Tejido transparente y resistente. Barrera física contra patógenos oculares.'},
+  {c:'Uñas', cat:'barreras', expl:'Queratina dura que protege las yemas de los dedos.'},
+  {c:'Secreción prostática', cat:'barreras', expl:'Contiene zinc y ácidos con acción antimicrobiana.'},
+  {c:'Enzimas pancreáticas', cat:'barreras', expl:'Destruyen patógenos ingeridos en el intestino delgado.'},
+  {c:'Pestañas', cat:'barreras', expl:'Barrera física que protege los ojos de polvo y partículas.'},
+  
+  // INNATA (25)
+  {c:'Neutrófilo', cat:'innata', expl:'Fagocito más abundante. Primero en llegar. Vida corta: muere formando pus.'},
+  {c:'Macrófago', cat:'innata', expl:'Fagocito grande. Come patógenos y presenta antígenos. Muy longevo.'},
+  {c:'Célula dendrítica', cat:'innata', expl:'Presentadora profesional de antígenos. Puente entre innata y adaptativa.'},
+  {c:'Célula NK', cat:'innata', expl:'Natural Killer. Mata células infectadas y tumorales sin aprendizaje.'},
+  {c:'Mastocito', cat:'innata', expl:'Libera histamina en alergias e inflamación. Centinela en tejidos.'},
+  {c:'Basófilo', cat:'innata', expl:'Leucocito que libera histamina y heparina en respuestas inflamatorias.'},
+  {c:'Eosinófilo', cat:'innata', expl:'Especializado contra parásitos grandes. También participa en alergias.'},
+  {c:'Complemento', cat:'innata', expl:'30+ proteínas que marcan patógenos, los perforan y atraen fagocitos.'},
+  {c:'Interferón', cat:'innata', expl:'Proteína antiviral. Avisan a células vecinas para que se protejan.'},
+  {c:'Interleucinas', cat:'innata', expl:'Mensajeros químicos entre células inmunes. Coordinan la respuesta.'},
+  {c:'Inflamación', cat:'innata', expl:'Respuesta innata con 4 signos: rubor, calor, tumor y dolor.'},
+  {c:'Fiebre', cat:'innata', expl:'Aumenta temperatura corporal para dificultar reproducción de patógenos.'},
+  {c:'Fagocitosis', cat:'innata', expl:'Proceso por el cual fagocitos engullen y digieren patógenos.'},
+  {c:'Pus', cat:'innata', expl:'Acumulación de neutrófilos muertos, bacterias y tejido.'},
+  {c:'Opsonización', cat:'innata', expl:'Marcado de patógenos para facilitar fagocitosis.'},
+  {c:'Quimiotaxis', cat:'innata', expl:'Movimiento dirigido de células inmunes hacia señales químicas.'},
+  {c:'Receptores PRR', cat:'innata', expl:'Pattern Recognition Receptors. Detectan patrones moleculares de patógenos.'},
+  {c:'Receptores TLR', cat:'innata', expl:'Toll-Like Receptors. Detectan componentes bacterianos y virales.'},
+  {c:'Histamina', cat:'innata', expl:'Molécula que dilata vasos y causa inflamación. Liberada por mastocitos.'},
+  {c:'Prostaglandinas', cat:'innata', expl:'Lípidos inflamatorios. Causan dolor y fiebre.'},
+  {c:'Cininas', cat:'innata', expl:'Péptidos que aumentan permeabilidad vascular en inflamación.'},
+  {c:'Lactoferrina', cat:'innata', expl:'Proteína que secuestra hierro, impidiendo que bacterias lo usen.'},
+  {c:'Defensinas', cat:'innata', expl:'Péptidos antimicrobianos naturales. Perforan membranas de patógenos.'},
+  {c:'Lisozima', cat:'innata', expl:'Enzima que rompe paredes bacterianas. Presente en lágrimas y saliva.'},
+  {c:'Proteína C reactiva', cat:'innata', expl:'Marcador de inflamación aguda. Opsoniza bacterias para fagocitosis.'},
+  
+  // ADAPTATIVA (25)
+  {c:'Linfocito B', cat:'adaptativa', expl:'Produce anticuerpos. Se activa en ganglios y se diferencia en células plasmáticas.'},
+  {c:'Linfocito T CD4', cat:'adaptativa', expl:'Director de orquesta. Coordina linfocitos B, T citotóxicos y macrófagos.'},
+  {c:'Linfocito T CD8', cat:'adaptativa', expl:'Asesino. Destruye células infectadas por virus o células tumorales.'},
+  {c:'Linfocito Treg', cat:'adaptativa', expl:'Frena la respuesta inmune. Previene autoinmunidad.'},
+  {c:'IgG', cat:'adaptativa', expl:'Anticuerpo más abundante en sangre. Pasa la placenta. Memoria a largo plazo.'},
+  {c:'IgA', cat:'adaptativa', expl:'Presente en mucosas, saliva, lágrimas. Primera defensa mucosa.'},
+  {c:'IgM', cat:'adaptativa', expl:'Primer anticuerpo en respuesta primaria. Forma pentámeros muy efectivos.'},
+  {c:'IgE', cat:'adaptativa', expl:'Involucrado en alergias y defensa contra parásitos. Activa mastocitos.'},
+  {c:'IgD', cat:'adaptativa', expl:'Receptor en superficie de linfocitos B vírgenes.'},
+  {c:'Timo', cat:'adaptativa', expl:'Órgano donde maduran los linfocitos T. Se atrofia con la edad.'},
+  {c:'Médula ósea', cat:'adaptativa', expl:'Origen de todas las células sanguíneas. Donde maduran los linfocitos B.'},
+  {c:'Ganglio linfático', cat:'adaptativa', expl:'Filtros de la linfa. Donde linfocitos encuentran antígenos.'},
+  {c:'Bazo', cat:'adaptativa', expl:'Filtra la sangre. Elimina glóbulos viejos y activa respuestas.'},
+  {c:'Amígdalas', cat:'adaptativa', expl:'Tejido linfoide en la garganta. Primera defensa contra patógenos bucales.'},
+  {c:'Apéndice', cat:'adaptativa', expl:'Reserva de bacterias buenas. Reinicia la flora intestinal.'},
+  {c:'Placas de Peyer', cat:'adaptativa', expl:'Tejido linfoide en intestino. Vigila patógenos ingeridos.'},
+  {c:'MHC I', cat:'adaptativa', expl:'Presenta antígenos internos a linfocitos T CD8. En todas las células.'},
+  {c:'MHC II', cat:'adaptativa', expl:'Presenta antígenos a linfocitos T CD4. Solo en células presentadoras.'},
+  {c:'Antígeno', cat:'adaptativa', expl:'Sustancia reconocida como extraña por el sistema inmune.'},
+  {c:'Epítopo', cat:'adaptativa', expl:'Parte específica del antígeno que reconoce un anticuerpo.'},
+  {c:'Expansión clonal', cat:'adaptativa', expl:'Multiplicación masiva del linfocito específico tras reconocer el antígeno.'},
+  {c:'Selección clonal', cat:'adaptativa', expl:'Solo se activan los linfocitos con receptor específico para el antígeno.'},
+  {c:'Respuesta primaria', cat:'adaptativa', expl:'Primera vez que el sistema ve un antígeno. Lenta (7-14 días).'},
+  {c:'Respuesta secundaria', cat:'adaptativa', expl:'Reexposición al mismo antígeno. Rápida (1-3 días), gracias a la memoria.'},
+  {c:'Afinidad', cat:'adaptativa', expl:'Fuerza de unión entre anticuerpo y antígeno. Aumenta con maduración.'},
+  
+  // MEMORIA (20)
+  {c:'Vacuna', cat:'memoria', expl:'Expone al sistema a un antígeno seguro para generar memoria sin enfermedad.'},
+  {c:'Célula memoria B', cat:'memoria', expl:'Linfocito B de larga vida. Recrea anticuerpos rápidamente si vuelve el patógeno.'},
+  {c:'Célula memoria T', cat:'memoria', expl:'Linfocito T de larga vida. Respuesta rápida ante reexposición.'},
+  {c:'Inmunidad activa', cat:'memoria', expl:'El propio cuerpo produce defensas. Larga duración.'},
+  {c:'Inmunidad pasiva', cat:'memoria', expl:'Se reciben anticuerpos ya hechos. Rápida pero corta.'},
+  {c:'Calostro', cat:'memoria', expl:'Primera leche materna. Rica en IgA. Inmunidad pasiva.'},
+  {c:'Suero antiofídico', cat:'memoria', expl:'Anticuerpos contra veneno de serpiente. Inmunidad pasiva de emergencia.'},
+  {c:'Vacuna atenuada', cat:'memoria', expl:'Patógeno vivo pero debilitado. Muy inmunogénica.'},
+  {c:'Vacuna inactivada', cat:'memoria', expl:'Patógeno muerto. Menos inmunogénica, requiere refuerzos.'},
+  {c:'Vacuna subunitaria', cat:'memoria', expl:'Solo fragmentos del patógeno. Muy segura.'},
+  {c:'Vacuna ARNm', cat:'memoria', expl:'Instrucciones genéticas para que células fabriquen antígeno.'},
+  {c:'Vacuna toxoide', cat:'memoria', expl:'Toxina bacteriana inactivada (ej. tétanos, difteria).'},
+  {c:'Inmunidad colectiva', cat:'memoria', expl:'Protege a quienes no pueden vacunarse cuando muchos están inmunes.'},
+  {c:'Refuerzo', cat:'memoria', expl:'Dosis adicional para reactivar memoria y aumentar anticuerpos.'},
+  {c:'Edward Jenner', cat:'memoria', expl:'Padre de la vacunología (1796). Usó viruela bovina contra viruela humana.'},
+  {c:'Louis Pasteur', cat:'memoria', expl:'Desarrolló vacunas contra rabia y ántrax.'},
+  {c:'Eradicación viruela', cat:'memoria', expl:'1980: primera enfermedad humana erradicada gracias a vacunación.'},
+  {c:'Poliomielitis', cat:'memoria', expl:'Casi erradicada. Vacuna Salk/Sabin redujeron casos en 99%.'},
+  {c:'Inmunidad mucosa', cat:'memoria', expl:'Defensa en mucosas mediada por IgA. Clave en vías respiratoria y digestiva.'},
+  {c:'Maduración afinidad', cat:'memoria', expl:'Los anticuerpos mejoran su unión al antígeno con el tiempo.'},
+  
+  // TRASTORNOS (15)
+  {c:'Alergia', cat:'trastornos', expl:'Respuesta exagerada a sustancias inofensivas. Mediada por IgE.'},
+  {c:'Anafilaxia', cat:'trastornos', expl:'Reacción alérgica grave y sistémica. Puede ser mortal.'},
+  {c:'Asma', cat:'trastornos', expl:'Inflamación crónica de vías respiratorias. Broncoespasmo.'},
+  {c:'Lupus', cat:'trastornos', expl:'Enfermedad autoinmune sistémica. Anticuerpos contra el propio ADN.'},
+  {c:'Artritis reumatoide', cat:'trastornos', expl:'Autoinmune. Ataca las articulaciones causando inflamación crónica.'},
+  {c:'Diabetes tipo 1', cat:'trastornos', expl:'Autoinmune. Destruye células beta del páncreas.'},
+  {c:'Esclerosis múltiple', cat:'trastornos', expl:'Autoinmune. Ataca la mielina de las neuronas.'},
+  {c:'VIH/SIDA', cat:'trastornos', expl:'Virus que destruye linfocitos T CD4. Inmunodeficiencia adquirida.'},
+  {c:'SCID', cat:'trastornos', expl:'Inmunodeficiencia combinada grave. "Niños burbuja".'},
+  {c:'Rechazo trasplante', cat:'trastornos', expl:'Sistema inmune ataca órgano trasplantado.'},
+  {c:'Urticaria', cat:'trastornos', expl:'Erupción cutánea alérgica. Ronchas rojas con picazón.'},
+  {c:'Rinitis alérgica', cat:'trastornos', expl:'Inflamación nasal por alérgenos. Estornudos y moco.'},
+  {c:'Eccema', cat:'trastornos', expl:'Inflamación cutánea crónica. Piel seca, roja y con picazón.'},
+  {c:'Enfermedad celíaca', cat:'trastornos', expl:'Autoinmune. Intolerancia al gluten que daña intestino.'},
+  {c:'Hashimoto', cat:'trastornos', expl:'Autoinmune. Destrucción de la glándula tiroides.'}
+];
+
+const GRID_SIZE = 8;
+let candyGrid = [];
+let candySelected = null;
+let candyScore = 0;
+let candyMoves = 0;
+let candyBestCombo = 0;
+let candyUnlocked = new Set();
+let candyProcessing = false;
+
+function initCandyGrid() {
+  candyGrid = [];
+  const cats = ['barreras', 'innata', 'adaptativa', 'memoria', 'trastornos'];
+  for (let i = 0; i < GRID_SIZE * GRID_SIZE; i++) {
+    // Evitar matches iniciales
+    let cat;
+    let attempts = 0;
+    do {
+      cat = cats[Math.floor(Math.random() * cats.length)];
+      attempts++;
+    } while (attempts < 20 && wouldMatch(i, cat));
+    candyGrid.push({cat, matched: false});
+  }
+  renderCandyGrid();
+}
+
+function wouldMatch(idx, cat) {
+  const row = Math.floor(idx / GRID_SIZE);
+  const col = idx % GRID_SIZE;
+  // Horizontal
+  if (col >= 2 && candyGrid[idx-1] && candyGrid[idx-2] && 
+      candyGrid[idx-1].cat === cat && candyGrid[idx-2].cat === cat) return true;
+  // Vertical
+  if (row >= 2 && candyGrid[idx-GRID_SIZE] && candyGrid[idx-2*GRID_SIZE] &&
+      candyGrid[idx-GRID_SIZE].cat === cat && candyGrid[idx-2*GRID_SIZE].cat === cat) return true;
+  return false;
+}
+
+function renderCandyGrid() {
+  const grid = document.getElementById('candyGrid');
+  grid.innerHTML = '';
+  const emojis = {barreras: '🛡️', innata: '⚡', adaptativa: '🎯', memoria: '🧠', trastornos: '⚠️'};
+  candyGrid.forEach((cell, idx) => {
+    const div = document.createElement('div');
+    div.className = `candy-cell ${cell.cat}`;
+    div.dataset.idx = idx;
+    div.textContent = emojis[cell.cat];
+    if (candySelected === idx) div.classList.add('selected');
+    div.addEventListener('click', () => handleCandyClick(idx));
+    grid.appendChild(div);
+  });
+}
+
+function handleCandyClick(idx) {
+  if (candyProcessing) return;
+  
+  if (candySelected === null) {
+    candySelected = idx;
+    renderCandyGrid();
+  } else {
+    if (candySelected === idx) {
+      candySelected = null;
+      renderCandyGrid();
+      return;
+    }
+    
+    const row1 = Math.floor(candySelected / GRID_SIZE);
+    const col1 = candySelected % GRID_SIZE;
+    const row2 = Math.floor(idx / GRID_SIZE);
+    const col2 = idx % GRID_SIZE;
+    const adjacent = (Math.abs(row1 - row2) === 1 && col1 === col2) || 
+                     (Math.abs(col1 - col2) === 1 && row1 === row2);
+    
+    if (adjacent) {
+      swapCandy(candySelected, idx);
+      candyMoves++;
+      const matches = findMatches();
+      if (matches.length > 0) {
+        candySelected = null;
+        processMatches(matches);
+      } else {
+        // Revertir si no hay match
+        swapCandy(candySelected, idx);
+        candyMoves--;
+        candySelected = null;
+        renderCandyGrid();
+      }
+    } else {
+      candySelected = idx;
+      renderCandyGrid();
+    }
+    updateCandyUI();
+  }
+}
+
+function swapCandy(idx1, idx2) {
+  const temp = candyGrid[idx1];
+  candyGrid[idx1] = candyGrid[idx2];
+  candyGrid[idx2] = temp;
+  renderCandyGrid();
+}
+
+function findMatches() {
+  const matches = new Set();
+  
+  // Horizontal
+  for (let row = 0; row < GRID_SIZE; row++) {
+    for (let col = 0; col < GRID_SIZE - 2; col++) {
+      const idx = row * GRID_SIZE + col;
+      const cat = candyGrid[idx].cat;
+      if (cat === candyGrid[idx + 1].cat && cat === candyGrid[idx + 2].cat) {
+        let end = col + 2;
+        while (end + 1 < GRID_SIZE && candyGrid[row * GRID_SIZE + end + 1].cat === cat) end++;
+        for (let i = col; i <= end; i++) matches.add(row * GRID_SIZE + i);
+      }
+    }
+  }
+  
+  // Vertical
+  for (let col = 0; col < GRID_SIZE; col++) {
+    for (let row = 0; row < GRID_SIZE - 2; row++) {
+      const idx = row * GRID_SIZE + col;
+      const cat = candyGrid[idx].cat;
+      if (cat === candyGrid[idx + GRID_SIZE].cat && cat === candyGrid[idx + 2 * GRID_SIZE].cat) {
+        let end = row + 2;
+        while (end + 1 < GRID_SIZE && candyGrid[(end + 1) * GRID_SIZE + col].cat === cat) end++;
+        for (let i = row; i <= end; i++) matches.add(i * GRID_SIZE + col);
+      }
+    }
+  }
+  
+  return Array.from(matches);
+}
+
+function processMatches(matches) {
+  candyProcessing = true;
+  
+  // Animar match
+  const cells = document.querySelectorAll('.candy-cell');
+  matches.forEach(idx => {
+    if (cells[idx]) cells[idx].classList.add('matching');
+  });
+  
+  // Determinar categoría mayoritaria para desbloquear dato
+  const catCount = {barreras: 0, innata: 0, adaptativa: 0, memoria: 0, trastornos: 0};
+  matches.forEach(idx => {
+    catCount[candyGrid[idx].cat]++;
+  });
+  const mainCat = Object.keys(catCount).reduce((a, b) => catCount[a] > catCount[b] ? a : b);
+  
+  // Puntos
+  const points = matches.length * 10;
+  candyScore += points;
+  if (matches.length > candyBestCombo) candyBestCombo = matches.length;
+  
+  // Desbloquear dato
+  unlockData(mainCat, matches.length);
+  
+  setTimeout(() => {
+    // Eliminar fichas
+    matches.forEach(idx => {
+      candyGrid[idx] = null;
+    });
+    
+    // Caída
+    for (let col = 0; col < GRID_SIZE; col++) {
+      let writePos = GRID_SIZE - 1;
+      for (let row = GRID_SIZE - 1; row >= 0; row--) {
+        const idx = row * GRID_SIZE + col;
+        if (candyGrid[idx] !== null) {
+          candyGrid[writePos * GRID_SIZE + col] = candyGrid[idx];
+          if (writePos !== row) candyGrid[idx] = null;
+          writePos--;
+        }
+      }
+      // Rellenar arriba
+      const cats = ['barreras', 'innata', 'adaptativa', 'memoria', 'trastornos'];
+      for (let i = writePos; i >= 0; i--) {
+        candyGrid[i * GRID_SIZE + col] = {
+          cat: cats[Math.floor(Math.random() * cats.length)],
+          matched: false
+        };
+      }
+    }
+    
+    renderCandyGrid();
+    // Animar caída
+    document.querySelectorAll('.candy-cell').forEach(c => c.classList.add('falling'));
+    setTimeout(() => {
+      document.querySelectorAll('.candy-cell').forEach(c => c.classList.remove('falling'));
+      candyProcessing = false;
+      
+      // Comprobar cascadas
+      const newMatches = findMatches();
+      if (newMatches.length > 0) {
+        setTimeout(() => processMatches(newMatches), 200);
+      }
+    }, 300);
+  }, 400);
+}
+
+function unlockData(cat, matchSize) {
+  const available = CANDY_DATA.filter(d => d.cat === cat && !candyUnlocked.has(d.c));
+  if (available.length === 0) return;
+  
+  // Más fichas = más datos desbloqueados
+  const numToUnlock = Math.min(Math.floor(matchSize / 3), available.length);
+  const shuffled = [...available].sort(() => Math.random() - 0.5);
+  
+  for (let i = 0; i < numToUnlock; i++) {
+    const data = shuffled[i];
+    candyUnlocked.add(data.c);
+    showDataMessage(data);
+  }
+  renderDataList();
+  updateCandyUI();
+}
+
+function showDataMessage(data) {
+  const msg = document.getElementById('candyMsg');
+  msg.className = 'candy-msg';
+  msg.innerHTML = `🧠 <strong>¡Dato desbloqueado!</strong> ${data.c}: ${data.expl}`;
+  setTimeout(() => { msg.innerHTML = ''; msg.className = ''; }, 4000);
+}
+
+function renderDataList() {
+  const list = document.getElementById('dataList');
+  list.innerHTML = '';
+  // Agrupar por categoría
+  const cats = ['barreras', 'innata', 'adaptativa', 'memoria', 'trastornos'];
+  const catNames = {barreras: '🛡️ Barreras', innata: '⚡ Innata', adaptativa: '🎯 Adaptativa', memoria: '🧠 Memoria', trastornos: '⚠️ Trastornos'};
+  
+  cats.forEach(cat => {
+    const catData = CANDY_DATA.filter(d => d.cat === cat);
+    const unlocked = catData.filter(d => candyUnlocked.has(d.c));
+    
+    const header = document.createElement('div');
+    header.style.cssText = 'margin-top:10px; padding:6px 10px; background:var(--panel); border-radius:6px; font-weight:700; font-size:.85rem; color:var(--accent)';
+    header.textContent = `${catNames[cat]} (${unlocked.length}/${catData.length})`;
+    list.appendChild(header);
+    
+    catData.forEach(d => {
+      const item = document.createElement('div');
+      item.className = `data-item ${d.cat} ${candyUnlocked.has(d.c) ? 'unlocked' : 'locked'}`;
+      item.innerHTML = `
+        <div class="concept">${candyUnlocked.has(d.c) ? d.c : '???'}</div>
+        <div class="expl">${candyUnlocked.has(d.c) ? d.expl : 'Combina fichas para desbloquear...'}</div>
+      `;
+      list.appendChild(item);
+    });
+  });
+}
+
+function updateCandyUI() {
+  document.getElementById('candyScore').textContent = candyScore;
+  document.getElementById('candyMoves').textContent = candyMoves;
+  document.getElementById('candyData').textContent = `${candyUnlocked.size}/105`;
+  document.getElementById('candyCombo').textContent = candyBestCombo;
+}
+
+document.getElementById('candyReset').addEventListener('click', () => {
+  if (confirm('¿Reiniciar el juego? Perderás el progreso del laboratorio.')) {
+    candyGrid = [];
+    candySelected = null;
+    candyScore = 0;
+    candyMoves = 0;
+    candyBestCombo = 0;
+    candyUnlocked = new Set();
+    initCandyGrid();
+    renderDataList();
+    updateCandyUI();
+  }
+});
+
+document.getElementById('candyShuffle').addEventListener('click', () => {
+  const cats = candyGrid.map(c => c.cat);
+  for (let i = cats.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [cats[i], cats[j]] = [cats[j], cats[i]];
+  }
+  candyGrid.forEach((cell, idx) => { cell.cat = cats[idx]; });
+  renderCandyGrid();
+  // Resolver matches inmediatos
+  setTimeout(() => {
+    const matches = findMatches();
+    if (matches.length > 0) processMatches(matches);
+  }, 300);
+});
+
+// Inicializar
+initCandyGrid();
+renderDataList();
+updateCandyUI();
+updateProgress();
+</script>
+
+</body>
+</html>
